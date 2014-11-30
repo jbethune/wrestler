@@ -1,15 +1,20 @@
 (ns wrestler.util
+  "Helper functions for this module. Consider these as private."
   (:import [java.io StringWriter])
   (:require [clj-http.client :as http])
   (:require [clojure.data.json :as json]))
 
 (def rest-methods
+  "Mapping of keywords to clj-http HTTP method identifiers"
   {:get http/get
    :post http/post
    :put http/put
    :del http/delete})
 
-(defn to-json [data]
+(defn to-json
+  "Convert a clojure value to JSON. This uses the clojure.data.json library and
+  it doesn not escape slashes"
+  [data]
   (let [sw (StringWriter.)]
     (json/write data sw :escape-slash false); escaped slashes are problematic with URLs
     (str sw)))
@@ -58,10 +63,11 @@
         (clojure.string/join "/" interpolated-url-parts)))))
 
 (defn request
-  "Send a REST request to cytoscape"
+  "Send a REST request to the server"
   ([method url] (request method url nil))
-  ([method url extra-params]
+  ([method url special-params]
    (let [method (if (keyword? method) (method rest-methods) method)
+         extra-params (apply hash-map special-params)
          full-url (str url (join-query-params extra-params))
          json (:json extra-params)
          payload (if json
