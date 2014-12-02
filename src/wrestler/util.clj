@@ -33,7 +33,7 @@
   (if params
     (str "?" (clojure.string/join
                "&"
-               (for [[k v] params :when (not (:json k))]
+               (for [[k v] params :when (not (= :json k))]
                  (str (name k) "=" v))))
     ""))
 
